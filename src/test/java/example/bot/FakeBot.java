@@ -4,14 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Фейковый бот для тестов
+ * Фейковый бот для тестов.
+ * Хранит в себе все отправленные сообщения
  */
 public class FakeBot implements Bot {
 
-    List<String> responses = new ArrayList<>();
+    List<String> messages = new ArrayList<>();
 
     @Override
     public void sendMessage(Long chatId, String message) {
-        responses.add(message);
+        messages.add(message);
+    }
+
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
     }
 }

@@ -20,7 +20,14 @@ class ContainerTest {
         Container container = new Container();
 
         container.add(item);
+        Assertions.assertEquals(1,container.size());
+        Assertions.assertTrue(container.contains(item));
+
         container.add(item2);
+
+        Assertions.assertEquals(2,container.size());
+        Assertions.assertTrue(container.contains(item2));
+
         container.add(item3);
 
         Assertions.assertEquals(3, container.size());

@@ -3,6 +3,9 @@ package example.note;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Тестовый класс для NoteLogic
+ */
 class NoteLogicTest {
 
     /**
