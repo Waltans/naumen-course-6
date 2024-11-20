@@ -16,11 +16,13 @@ public class FakeBot implements Bot {
         messages.add(message);
     }
 
+    /**
+     * Отдает список сообщений бота
+     *
+     * @return - все сообщения бота
+     */
     public List<String> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<String> messages) {
-        this.messages = messages;
-    }
 }
