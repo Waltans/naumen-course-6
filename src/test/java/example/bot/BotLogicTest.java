@@ -32,10 +32,17 @@ class BotLogicTest {
         String firstQuestion = bot.getMessages().getFirst();
         service.processCommand(user, "100");
         String response = bot.getMessages().get(1);
+        String secondQuestion = bot.getMessages().get(2);
+        service.processCommand(user, "6");
+        String secondResponse = bot.getMessages().get(3);
+        String thirdResponse = bot.getMessages().get(4);
 
 
         Assertions.assertEquals("Вычислите степень: 10^2", firstQuestion);
         Assertions.assertEquals("Правильный ответ!", response);
+        Assertions.assertEquals("Сколько будет 2 + 2 * 2", secondQuestion);
+        Assertions.assertEquals("Правильный ответ!", secondResponse);
+        Assertions.assertEquals("Тест завершен", thirdResponse);
     }
 
     /**
@@ -45,13 +52,13 @@ class BotLogicTest {
     @Test
     void processTestCommand_whenResponseWrong() {
         service.processCommand(user, "/test");
-        String firstQuestion = bot.messages.getFirst();
+        String firstQuestion = bot.getMessages().getFirst();
         service.processCommand(user, "101");
-        String secondResponse = bot.messages.get(1);
-        String third = bot.messages.get(2);
+        String secondResponse = bot.getMessages().get(1);
+        String third = bot.getMessages().get(2);
         service.processCommand(user, "10");
-        String secondQuestionResponse = bot.messages.get(3);
-        String endTestResponse = bot.messages.get(4);
+        String secondQuestionResponse = bot.getMessages().get(3);
+        String endTestResponse = bot.getMessages().get(4);
 
         Assertions.assertEquals("Вычислите степень: 10^2", firstQuestion);
         Assertions.assertEquals("Вы ошиблись, верный ответ: 100", secondResponse);
@@ -67,39 +74,33 @@ class BotLogicTest {
      * @throws InterruptedException
      */
     @Test
-    public void testNotifyCommand() throws InterruptedException {
+    void testNotifyCommand() throws InterruptedException {
         service.processCommand(user, "/notify");
-        String firstResponse = bot.messages.getFirst();
+        String firstResponse = bot.getMessages().getFirst();
         service.processCommand(user, "description");
-        String secondResponse = bot.messages.get(1);
+        String secondResponse = bot.getMessages().get(1);
         service.processCommand(user, "1");
-        String thirdResponse = bot.messages.get(2);
-        Assertions.assertEquals(0, bot.getMessages().size());
-        Thread.sleep(1001);
+        String thirdResponse = bot.getMessages().get(2);
+        Assertions.assertEquals(3, bot.getMessages().size());
+        Thread.sleep(1020);
 
         Assertions.assertEquals("Введите текст напоминания", firstResponse);
         Assertions.assertEquals("Через сколько секунд напомнить?", secondResponse);
         Assertions.assertEquals("Напоминание установлено", thirdResponse);
-        Assertions.assertEquals("Сработало напоминание: 'description'", bot.messages.get(3));
+        Assertions.assertEquals("Сработало напоминание: 'description'", bot.getMessages().get(3));
     }
 
     /**
      * Тест, что команда /notify работает при неверном введении количества секунд задержки
-     *
-     * @throws InterruptedException
      */
     @Test
     void testNotifyCommandUncorrectedWaitParam() {
-        FakeBot bot = new FakeBot();
-        BotLogic service = new BotLogic(bot);
-        User user = new User(1L);
-
         service.processCommand(user, "/notify");
-        String firstResponse = bot.messages.getFirst();
+        String firstResponse = bot.getMessages().getFirst();
         service.processCommand(user, "description");
-        String secondResponse = bot.messages.get(1);
+        String secondResponse = bot.getMessages().get(1);
         service.processCommand(user, "word");
-        String thirdResponse = bot.messages.get(2);
+        String thirdResponse = bot.getMessages().get(2);
 
         Assertions.assertEquals("Введите текст напоминания", firstResponse);
         Assertions.assertEquals("Через сколько секунд напомнить?", secondResponse);
@@ -111,46 +112,74 @@ class BotLogicTest {
      */
     @Test
     void testRepeatCommand() {
-        FakeBot bot = new FakeBot();
-        BotLogic service = new BotLogic(bot);
-        User user = new User(1L);
 
+        service.processCommand(user, "/test");
+        service.processCommand(user, "100");
+        service.processCommand(user, "6");
         service.processCommand(user, "/repeat");
-        String response = bot.messages.getFirst();
+        String response = bot.getMessages().getLast();
 
         Assertions.assertEquals("Нет вопросов для повторения", response);
-        Assertions.assertTrue(user.getWrongAnswerQuestions().isEmpty());
     }
 
     /**
      * Тест команды /repeat, если есть вопросы для повторения
      */
     @Test
-    void testRepeatCommandWithQuestion() {
+    void testRepeatCommandWithQuestions() {
         service.processCommand(user, "/test");
         service.processCommand(user, "50");
+        Assertions.assertEquals("Вы ошиблись, верный ответ: 100", bot.getMessages().get(1));
         service.processCommand(user, "0");
+        Assertions.assertEquals("Вы ошиблись, верный ответ: 6", bot.getMessages().get(3));
 
         service.processCommand(user, "/repeat");
-        String response = bot.messages.get(5);
+        String response = bot.getMessages().get(5);
         Assertions.assertEquals("Вычислите степень: 10^2", response);
 
         service.processCommand(user, "100");
-        String rightResponseFirst = bot.messages.get(6);
+        String rightResponseFirst = bot.getMessages().get(6);
         Assertions.assertEquals("Правильный ответ!", rightResponseFirst);
 
-        String secondResponse = bot.messages.get(7);
+        String secondResponse = bot.getMessages().get(7);
         Assertions.assertEquals("Сколько будет 2 + 2 * 2", secondResponse);
 
         service.processCommand(user, "6");
-        String rightResponseSecond = bot.messages.get(8);
+        String rightResponseSecond = bot.getMessages().get(8);
         Assertions.assertEquals("Правильный ответ!", rightResponseSecond);
 
-        String thirdResponse = bot.messages.get(9);
+        String thirdResponse = bot.getMessages().get(9);
         Assertions.assertEquals("Тест завершен", thirdResponse);
 
         service.processCommand(user, "/repeat");
         Assertions.assertEquals("Нет вопросов для повторения", bot.getMessages().get(10));
+    }
+
+    /**
+     * Тест команды /repeat, если есть 1 вопрос для повторения
+     */
+    @Test
+    void testRepeatCommandWithQuestion() {
+        service.processCommand(user, "/test");
+        service.processCommand(user, "100");
+        Assertions.assertEquals("Правильный ответ!", bot.getMessages().get(1));
+        service.processCommand(user, "0");
+        Assertions.assertEquals("Вы ошиблись, верный ответ: 6", bot.getMessages().get(3));
+
+        service.processCommand(user, "/repeat");
+
+        String secondResponse = bot.getMessages().get(5);
+        Assertions.assertEquals("Сколько будет 2 + 2 * 2", secondResponse);
+
+        service.processCommand(user, "6");
+        String rightResponseSecond = bot.getMessages().get(6);
+        Assertions.assertEquals("Правильный ответ!", rightResponseSecond);
+
+        String thirdResponse = bot.getMessages().get(7);
+        Assertions.assertEquals("Тест завершен", thirdResponse);
+
+        service.processCommand(user, "/repeat");
+        Assertions.assertEquals("Нет вопросов для повторения", bot.getMessages().get(8));
     }
 
 }
